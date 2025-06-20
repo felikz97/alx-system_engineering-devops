@@ -1,12 +1,1 @@
- User
-  |
- [DNS: www.foobar.com → 8.8.8.8]
-  |
-[Internet]
-  |
-[Server (8.8.8.8)]
-  |--- Nginx (Web Server)
-        |
-        |---> App Server (e.g., Flask/PHP)
-                 |
-                 --> MySQL Database
+https://imgur.com/a/HsritHE 
