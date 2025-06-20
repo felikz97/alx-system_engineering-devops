@@ -53,6 +53,106 @@ The server and client communicate using the **HTTP/HTTPS protocols** over **TCP/
 ![alt text](Web_infrastructure0001.png)
 
 
+
+## 🏗️ Infrastructure Specifics: Load Balancer, Clustering, and Redundancy
+
+### ➕ For Every Additional Element, Why You Are Adding It
+
+| Component | Purpose |
+|----------|---------|
+| **Load Balancer** | Distributes incoming traffic across multiple backend servers to ensure availability and reliability. |
+| **Database Primary-Replica Cluster** | Increases database read performance and provides failover capabilities. |
+| **Firewall** | Secures infrastructure by controlling traffic flow and blocking malicious access. |
+| **HTTPS** | Encrypts data in transit, protecting user data and establishing trust. |
+| **Monitoring System** | Detects failures, provides visibility, and helps with scaling and debugging. |
+
+---
+
+## 🔁 Load Balancer Distribution Algorithm
+
+**Distribution Algorithm: Round Robin**
+
+- The load balancer uses **Round Robin**, where it forwards each incoming request to the next available backend server in a circular order.
+- Example:
+  - Request 1 → Server A
+  - Request 2 → Server B
+  - Request 3 → Server C
+  - Request 4 → Server A (restarts the cycle)
+
+Other common algorithms include:
+- **Least Connections**: sends traffic to the server with the fewest current connections
+- **IP Hash**: routes based on client IP to maintain session persistence
+
+---
+
+## 🧭 Active-Active vs. Active-Passive Load Balancing
+
+| Setup | Description | Use Case |
+|-------|-------------|----------|
+| **Active-Active** | All servers are running and sharing traffic simultaneously | High performance and redundancy |
+| **Active-Passive** | Only the primary server handles traffic, the secondary remains on standby | Simpler to configure but with limited load capacity |
+
+In **Active-Active**, traffic is balanced across all healthy nodes. If one fails, others continue to serve users.
+
+In **Active-Passive**, the standby server is only activated if the active one fails, introducing a short failover time.
+
+---
+
+## 🗃️ How a Database Primary-Replica (Master-Slave) Cluster Works
+
+- The **Primary (Master)** node handles **write** operations (INSERT, UPDATE, DELETE).
+- **Replica (Slave)** nodes receive updates from the primary and handle **read** operations.
+- Replication can be:
+  - **Asynchronous** (eventual consistency)
+  - **Semi-synchronous** (balance between performance and data integrity)
+
+---
+
+## ⚙️ Difference Between Primary and Replica Nodes (Application Perspective)
+
+| Feature | Primary Node | Replica Node |
+|--------|---------------|--------------|
+| Handles Writes | ✅ | ❌ |
+| Handles Reads  | ✅ | ✅ (used for load distribution) |
+| Risk of Conflict | Possible if multiple primaries exist | None (read-only) |
+| Failure Impact | Data loss if no replication | Can be promoted to primary if configured |
+
+Applications must be aware of the database role:
+- Writes must go to the **primary**
+- Reads can be routed to **replicas** to improve performance
+
+---
+
+## ⚠️ Issues in This Infrastructure
+
+### ❗ Single Points of Failure (SPOF)
+
+- If the **load balancer** fails and there is no backup, all access is lost.
+- If only one **primary database** exists and fails, **write operations stop**.
+- No **failover** or clustering introduces fragility.
+
+### ❗ Security Issues
+
+- **No firewall** → The infrastructure is open to unauthorized access or attacks (e.g., brute-force, DDoS).
+- **No HTTPS** → Data is transmitted in plaintext, exposing sensitive user information to eavesdropping.
+
+### ❗ No Monitoring
+
+- Without monitoring:
+  - Server failures go unnoticed until users report
+  - No insight into performance, traffic, or resource usage
+  - Scaling or debugging becomes reactive and difficult
+
+---
+
+##  Recommendation
+To improve this setup:
+- Introduce **redundant components** (load balancer, DB, web/app servers)
+- Add **firewalls** and **HTTPS**
+- Deploy **monitoring tools** like Prometheus + Grafana or Datadog
+- Enable **auto-failover** for databases and multi-zone deployment
+
+
 ## 🔧 Additional Infrastructure Considerations
 
 ### ➕ For Every Additional Element, Why You Are Adding It
