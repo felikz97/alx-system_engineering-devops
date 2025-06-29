@@ -1,1 +1,1 @@
-This directory contains shell variable and expansion tasks.
+Shell variables and expansions
