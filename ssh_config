@@ -54,4 +54,4 @@ Host ssh.dev.azure.com
 Host *.visualstudio.com
         HostkeyAlgorithms +ssh-rsa
         PubkeyAcceptedAlgorithms +ssh-rs
-
+# !SECTION
