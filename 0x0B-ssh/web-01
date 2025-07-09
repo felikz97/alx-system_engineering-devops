@@ -5,4 +5,5 @@ eval $("ssh-agent")
 
 ssh-add ~/.ssh/school
 
-ssh ubuntu@54.174.195.221
+# Connect to the server using the private key
+ssh ubuntu@18.206.162.138
