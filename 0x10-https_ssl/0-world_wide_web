@@ -2,26 +2,16 @@
 # Displays DNS record info for subdomains of a domain
 
 # Function to fetch and print record info
-get_record_info() {
-    local DOMAIN=$1
-    local SUB=$2
-    local FQDN="${SUB}.${DOMAIN}"
-
-    RECORD_LINE=$(dig +short ${FQDN} | head -n1)
-
-    if [[ -n "$RECORD_LINE" ]]; then
-        echo "The subdomain ${SUB} is a A record and points to ${RECORD_LINE}"
-    fi
+print_domain_subdomain(){
+    dig "$1" | grep -A1 'ANSWER SECTION' | sed -r "s/$1./$2/g" | awk -f"" ' NR==2 { print "The subdomain" $1 "is a "record and points to "$5}'
 }
 
-# Main logic
-domain=$1
-subdomain=$2
-
-if [ -z "$subdomain" ]; then
-    for sub in www lb-01 web-01 web-02; do
-        get_record_info $domain $sub
-    done
+if [ "$#" -eq 2]
+then
+    print_domain_subdomain "$2.$1" "$2"
 else
-    get_record_info $domain $subdomain
+    print_domain_subdomain "www.$1" "www"
+    print_domain_subdomain "lb-01.$1 "www"
+    print_domain_subdomain "web-01.$1 "www"
+    print_domain_subdomain "web-02.$1" "www"
 fi
