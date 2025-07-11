@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
-# Transfers a file to a remote server using scp and a private SSH key
-
-# Check if at least 4 arguments are provided
-if [ "$#" -lt 4 ]; then
+# Transfers a file from our client to a server
+#
+# variables
+if [ $# -lt 4 ]
+then
   echo "Usage: 0-transfer_file PATH_TO_FILE IP USERNAME PATH_TO_SSH_KEY"
-  exit 1
+else
+  scp -o StrictHostKeyChecking=no -i "$4" "$1" "$3@$2":~
 fi
-
-# Assign variables from arguments
-FILE="$1"
-SERVER_IP="$2"
-USERNAME="$3"
-SSH_KEY="$4"
-
-# Perform the secure copy (SCP) to remote server home directory
-scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "$FILE" "$USERNAME@$SERVER_IP:~/"
