@@ -1,17 +1,34 @@
 #!/usr/bin/env bash
-# Displays DNS record info for subdomains of a domain
+# shellcheck disable=SC2086
 
-# Function to fetch and print record info
-print_domain_subdomain(){
-    dig "$1" | grep -A1 'ANSWER SECTION' | sed -r "s/$1./$2/g" | awk -f"" ' NR==2 { print "The subdomain" $1 "is a "record and points to "$5}'
+# Function to get DNS record info for a given subdomain and domain
+get_sub_info() {
+    local subdomain=$1
+    local domain=$2
+    # Query DNS and capture only the answer section
+    # Output format: name TTL CLASS TYPE RDATA
+    local answer=$(dig +noall +answer ${subdomain}.${domain})
+    # Parse record type and destination
+    local record_type=$(echo "$answer" | awk '{print $4}')
+    local destination=$(echo "$answer" | awk '{print $5}')
+    echo "The subdomain ${subdomain} is a ${record_type} record and points to ${destination}"
+    }
+
+    # Main execution flow
+    main() {
+    local domain=$1
+    local subdomain=$2
+
+    if [ -z "$subdomain" ]; then
+        # Default list of subdomains in the specified order
+        for sd in www lb-01 web-01 web-02; do
+        get_sub_info $sd $domain
+        done
+    else
+        # Single subdomain lookup
+        get_sub_info $subdomain $domain
+    fi
 }
 
-if [ "$#" -eq 2]
-then
-    print_domain_subdomain "$2.$1" "$2"
-else
-    print_domain_subdomain "www.$1" "www"
-    print_domain_subdomain "lb-01.$1 "www"
-    print_domain_subdomain "web-01.$1 "www"
-    print_domain_subdomain "web-02.$1" "www"
-fi
+# Call main with all script arguments
+main $1 $2
