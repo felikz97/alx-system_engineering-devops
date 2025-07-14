@@ -1,0 +1,58 @@
+# /etc/haproxy/haproxy.cfg
+
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
+global
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+    # Default SSL material locations
+    ca-base /etc/ssl/certs
+    crt-base /etc/ssl/private
+
+    ssl-default-bind-ciphers PROFILE=SYSTEM
+    ssl-default-bind-options no-sslv3
+
+#---------------------------------------------------------------------
+# Defaults section
+#---------------------------------------------------------------------
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000
+    timeout client  50000
+    timeout server  50000
+
+#---------------------------------------------------------------------
+# Frontend for HTTPS
+#---------------------------------------------------------------------
+frontend https-in
+    bind *:443 ssl crt /etc/ssl/certs/mydomain.pem
+    mode http
+    default_backend web-servers
+
+#---------------------------------------------------------------------
+# Backend servers
+#---------------------------------------------------------------------
+backend web-servers
+    mode http
+    balance roundrobin
+    option httpchk GET /
+    server web-01 192.168.1.10:80 check
+    server web-02 192.168.1.11:80 check
+
+#---------------------------------------------------------------------
+# Optional HTTP redirect to HTTPS
+#---------------------------------------------------------------------
+frontend http-in
+    bind *:80
+    redirect scheme https if !{ ssl_fc }
